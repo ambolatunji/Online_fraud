@@ -1,0 +1,17 @@
+streamlit
+#tensorflow==2.11.0
+tensorflow
+pandas
+matplotlib
+seaborn
+scikit-learn
+xgboost
+lightgbm
+joblib
+openpyxl
+stable-baselines3
+gymnasium
+scikeras
+keras
+#numpy==1.23.5
+
