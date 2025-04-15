@@ -1,11 +1,5 @@
 
-fraudml/
-*.csv
-*.csv.gz
-*/fraudml/
-*.json
-*/logs/
-*.log
+
 
 
 

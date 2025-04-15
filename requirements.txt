@@ -14,4 +14,12 @@ gymnasium
 scikeras
 keras
 #numpy==1.23.5
+openpyxl
+fpdf
+nbconvert
+nbformat
+markdownify
+smolagents
+requests
+duckduckgo_search
 
