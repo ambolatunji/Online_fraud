@@ -19,7 +19,8 @@ fpdf
 nbconvert
 nbformat
 markdownify
-smolagents
+#smolagents
 requests
-duckduckgo_search
-
+#duckduckgo_search
+xlsxwriter
+optuna

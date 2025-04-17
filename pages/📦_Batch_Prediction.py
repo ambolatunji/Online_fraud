@@ -4,10 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, roc_curve
 from utils import compute_features, load_model, list_saved_models
 from tensorflow.keras.models import load_model as load_dl_model
 from stable_baselines3 import DQN
+import io
 import os
 
 st.set_page_config(page_title="📦 Batch Prediction", layout="wide")
@@ -130,20 +131,54 @@ if uploaded:
             acc = accuracy_score(actual, predicted)
             auc = roc_auc_score(actual, df["Confidence"])
             cm = confusion_matrix(actual, predicted)
-            #acc = accuracy_score(df["isFraud_actual"], df["isFraud_Predicted"])
-            #auc = roc_auc_score(df["isFraud_actual"], df["Confidence"])
-            #cm = confusion_matrix(df["isFraud_actual"], df["isFraud_Predicted"])
+
+            # Calculate ROC curve
+            fpr, tpr, thresholds = roc_curve(actual, df["Confidence"])
 
             st.metric("Accuracy", f"{acc:.2%}")
             st.metric("AUC Score", f"{auc:.2f}")
 
-            fig, ax = plt.subplots()
-            sns.heatmap(cm, annot=True, fmt='d', cmap='Reds', ax=ax)
-            ax.set_title("Confusion Matrix")
-            ax.set_xlabel("Predicted")
-            ax.set_ylabel("Actual")
+            # Display ROC curve
+            fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+            
+            # Confusion Matrix
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Reds', ax=ax1)
+            ax1.set_title("Confusion Matrix")
+            ax1.set_xlabel("Predicted")
+            ax1.set_ylabel("Actual")
+            
+            # ROC Curve
+            ax2.plot(fpr, tpr, 'b-', label=f'ROC (AUC = {auc:.2f})')
+            ax2.plot([0, 1], [0, 1], 'r--', label='Random')
+            ax2.set_xlabel('False Positive Rate')
+            ax2.set_ylabel('True Positive Rate')
+            ax2.set_title('ROC Curve')
+            ax2.legend()
+            ax2.grid(True)
+            
             st.pyplot(fig)
 
+            # Display FPR and TPR values
+            with st.expander("View FPR and TPR values"):
+                fpr_tpr_df = pd.DataFrame({
+                    'False Positive Rate': fpr,
+                    'True Positive Rate': tpr,
+                    'Thresholds': thresholds
+                })
+                st.dataframe(fpr_tpr_df)
+
         # Export
+        # CSV Export
         st.download_button("Download CSV", df.to_csv(index=False), "predictions.csv", mime="text/csv")
-        st.download_button("Download Excel", df.to_excel(index=False), "predictions.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+        # Excel Export
+        excel_buffer = io.BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False, sheet_name="Predictions")
+            writer.save()
+        st.download_button(
+            label="Download Excel",
+            data=excel_buffer.getvalue(),
+            file_name="predictions.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
