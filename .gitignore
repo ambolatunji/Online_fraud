@@ -5,3 +5,9 @@
 
 # Ignore all files in the fraudml directory
 fraud/*
+*.csv
+*.json
+*.parquet
+*.log
+*.txt   
+*.xlsx
